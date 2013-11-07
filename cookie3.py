@@ -7,9 +7,38 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 
 from thinkbayes import Pmf
 
+class Bowl(object):
+    def __init__(self, cookies):
+        self.cookies = cookies
+        self.normalize()
+
+
+    def Update(self, cookie):
+        # remove a cookie
+        try:
+            if self.cookies[cookie] == 0:
+                raise IndexError
+            self.cookies[cookie] -= 1
+        except IndexError:
+            raise
+
+
+    def normalize(self):
+        total = sum(self.cookies.values())
+        cookies = self.cookies.copy()
+        for flavor in cookies.keys():
+            cookies[flavor] = 1.0 * cookies[flavor] / total
+
+        return cookies
+
 
 class Cookie(Pmf):
     """A map from string bowl ID to probablity."""
+
+    mixes = {
+        'Bowl 1':dict(vanilla=0.75, chocolate=0.25),
+        'Bowl 2':dict(vanilla=0.5, chocolate=0.5),
+        }
 
     def __init__(self, hypos):
         """Initialize self.
@@ -31,10 +60,6 @@ class Cookie(Pmf):
             self.Mult(hypo, like)
         self.Normalize()
 
-    mixes = {
-        'Bowl 1':dict(vanilla=0.75, chocolate=0.25),
-        'Bowl 2':dict(vanilla=0.5, chocolate=0.5),
-        }
 
     def Likelihood(self, data, hypo):
         """The likelihood of the data under the hypothesis.
