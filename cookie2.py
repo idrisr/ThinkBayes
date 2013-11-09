@@ -52,6 +52,7 @@ def main():
 
     pmf = Cookie(hypos)
 
+    # we're saying that this is the data
     pmf.Update('vanilla')
 
     for hypo, prob in pmf.Items():
