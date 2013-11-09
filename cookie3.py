@@ -6,45 +6,19 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 """
 
 from thinkbayes import Pmf
-
-class Bowl(object):
-    def __init__(self, cookies):
-        self.cookies = cookies
-        self.normalize()
-
-
-    def Update(self, cookie):
-        # remove a cookie
-        try:
-            if self.cookies[cookie] == 0:
-                raise IndexError
-            self.cookies[cookie] -= 1
-        except IndexError:
-            raise
-
-
-    def normalize(self):
-        total = sum(self.cookies.values())
-        cookies = self.cookies.copy()
-        for flavor in cookies.keys():
-            cookies[flavor] = 1.0 * cookies[flavor] / total
-
-        return cookies
+from bowl import Bowl
 
 
 class Cookie(Pmf):
     """A map from string bowl ID to probablity."""
 
-    mixes = {
-        'Bowl 1':dict(vanilla=0.75, chocolate=0.25),
-        'Bowl 2':dict(vanilla=0.5, chocolate=0.5),
-        }
 
-    def __init__(self, hypos):
+    def __init__(self, hypos, bowls):
         """Initialize self.
 
         hypos: sequence of string bowl IDs
         """
+        self.bowls = bowls
         Pmf.__init__(self)
         for hypo in hypos:
             self.Set(hypo, 1)
@@ -67,21 +41,30 @@ class Cookie(Pmf):
         data: string cookie type
         hypo: string bowl ID
         """
-        mix = self.mixes[hypo]
-        like = mix[data]
+        mix = self.bowls[hypo]
+        like = mix[data] / self.bowls[hypo].total()
+        if mix[data] > 0:
+            self.bowls[hypo].Remove(data)
         return like
 
 
 def main():
     hypos = ['Bowl 1', 'Bowl 2']
+    bowls = {
+        'Bowl 1':Bowl(dict(Vanilla=30, Chocolate=10)),
+        'Bowl 2':Bowl(dict(Vanilla=20, Chocolate=20)),
+        }
 
-    pmf = Cookie(hypos)
+    pmf = Cookie(hypos, bowls)
 
     # we're saying that this is the data
-    pmf.Update('vanilla')
+    pmf.Update('Vanilla')
 
     for hypo, prob in pmf.Items():
         print hypo, prob
+
+    print pmf.bowls['Bowl 1'];
+    print pmf.bowls['Bowl 2'];
 
 
 if __name__ == '__main__':
