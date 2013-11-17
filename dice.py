@@ -26,11 +26,14 @@ class Dice(Suite):
 def main():
     suite = Dice([4, 6, 8, 12, 20])
 
-    suite.Update(6)
-    print 'After one 6'
-    suite.Print()
+    # suite.Update(6)
+    # print 'After one 6'
+    # suite.Print()
 
-    for roll in [4, 8, 7, 7, 2]:
+    # for roll in [4, 8, 7, 7, 2]:
+    # does order matter?
+    # order does not matter for this one
+    for roll in [6, 6, 8, 7, 7, 5, 4]:
         suite.Update(roll)
 
     print 'After more rolls'
