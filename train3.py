@@ -7,8 +7,9 @@ License: GNU GPLv3 http://www.gnu.org/licenses/gpl.html
 
 import thinkbayes
 import thinkplot
+import numpy as np
 
-from thinkbayes import Pmf, Percentile
+from thinkbayes import Pmf, Percentile, Suite
 from dice import Dice
 
 
@@ -29,6 +30,24 @@ class Train2(Dice):
         for hypo in hypos:
             self.Set(hypo, hypo**(-alpha))
         self.Normalize()
+
+
+class Train3(Suite):
+    def Likelihood(self, data, hypo):
+        """Exercise 3
+        Assumes a power law distribution of the size of companies.
+        For example, if there were 5 companies A-E, A would have 1 car, B has 2 ... etc
+        Therefore there are 5 cars labeled 1, 4 labeled 2, ... and one 1 labeled 5.
+        For the hypothesis there are 5 total cars and we observe a car labeled 5,
+        The likelihood is (1/5) / (1 + 1/2 + 1/3 + 1/4 + 1/5)
+        which would require fractional cars, since if there were 5 cars total, a power law
+        distribution does not allow discrete number of cars per company.
+        """
+        if hypo < data:
+            return 0
+        else:
+            denom = np.arange(1, hypo)
+            return hypo**-1.0 / sum(denom**-1.0)
 
 
 def MakePosterior(high, dataset, constructor):
@@ -58,8 +77,8 @@ def ComparePriors():
     thinkplot.Clf()
     thinkplot.PrePlot(num=2)
 
-    constructors = [Train, Train2]
-    labels = ['uniform', 'power law']
+    constructors = [Train, Train2, Train3]
+    labels = ['uniform', 'power law', 'many companies']
 
     for constructor, label in zip(constructors, labels):
         suite = MakePosterior(high, dataset, constructor)
